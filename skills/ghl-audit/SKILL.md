@@ -97,6 +97,10 @@ Fecha: [fecha]
 5. [LOW] Añadir stage "Cita Confirmada" al pipeline
 ```
 
+## Agente Especialista
+
+La auditoría forma parte de la FASE 4 (Validación) del swarm del `ghl-project-architect`. El director usa esta checklist para verificar coherencia después de que los 6 especialistas terminan. Usa `/ghl-deploy` para el flujo completo.
+
 ## Reglas
 
 - Ser específico en los findings: no "mejorar workflows", sino "falta workflow de no-show recovery que debería activarse 30 min después de un no-show"

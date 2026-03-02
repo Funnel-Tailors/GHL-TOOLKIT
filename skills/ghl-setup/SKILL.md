@@ -70,6 +70,10 @@ Mostrar resumen de todo lo configurado:
 - Webhooks registrados
 - Próximos pasos recomendados
 
+## Agente Especialista
+
+Para un despliegue completo end-to-end (no solo infraestructura base), este skill es orquestado por el agente `ghl-infra-engineer` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+
 ## Reglas
 - NUNCA crear duplicados. Siempre verificar primero.
 - Si un campo ya existe con nombre similar, preguntar antes de crear uno nuevo.

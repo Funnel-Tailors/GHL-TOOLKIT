@@ -73,6 +73,10 @@ Basado en interacción post-formulario:
 | **COLD** | 20–39 | Nurturing suave. Puede reactivarse. |
 | **DISQUALIFIED** | < 20 | No encaja. Marcar y no invertir recursos. |
 
+## Agente Especialista
+
+Para un diseño de scoring profundo, predictivo y adaptado al proyecto real, este skill es orquestado por el agente `ghl-scoring-engineer` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+
 ## Reglas
 
 - Los criterios son 100% configurables por proyecto. Los de arriba son defaults.

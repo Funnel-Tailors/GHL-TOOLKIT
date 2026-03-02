@@ -82,6 +82,10 @@ Adaptados al qualification_status:
 4. **Definir timing**: Cuándo se envía cada mensaje
 5. **Configurar en GHL**: Instrucciones para crear los workflows en GHL UI
 
+## Agente Especialista
+
+Para secuencias de nurturing ultra-personalizadas con copy real (no placeholders), este skill es orquestado por el agente `ghl-nurture-strategist` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+
 ## Reglas
 
 - NUNCA escribir mensajes genéricos. Siempre personalizar para el proyecto.

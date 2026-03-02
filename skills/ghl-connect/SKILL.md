@@ -98,6 +98,10 @@ Si es posible con el framework del proyecto:
 
 Ver [WEBHOOK-PATTERNS.md](WEBHOOK-PATTERNS.md) para patrones detallados.
 
+## Agente Especialista
+
+Para una integración completa que lea el código real de la landing y genere código production-ready específico al framework, este skill es orquestado por el agente `ghl-integration-engineer` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+
 ## Reglas
 
 - SIEMPRE capturar UTMs y behavior data, incluso si el formulario es simple

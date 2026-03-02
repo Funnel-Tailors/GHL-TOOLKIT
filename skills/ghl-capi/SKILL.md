@@ -102,6 +102,10 @@ Para cada proyecto, crear Custom Conversions en Meta Ads Manager:
 
 Esto permite optimizar campañas específicamente para cada etapa del funnel.
 
+## Agente Especialista
+
+Para una configuración CAPI profunda con optimización de EMQ, event selection por volumen, y value-based optimization, este skill es orquestado por el agente `ghl-capi-engineer` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+
 ## Reglas
 
 - SIEMPRE incluir event_id para deduplicación browser ↔ server

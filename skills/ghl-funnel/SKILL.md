@@ -89,6 +89,10 @@ Proponer siempre al menos 3 tests:
 4. **Primer mensaje post-form**: SMS vs email vs WhatsApp
 5. **Timing del primer recordatorio**: 24h vs 12h vs 6h antes
 
+## Agente Especialista
+
+Para un diseño de funnel profundo con psicología de conversión, micro-commitments, y branching avanzado por score, este skill es orquestado por el agente `ghl-funnel-strategist` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+
 ## Output
 
 Entregar:
