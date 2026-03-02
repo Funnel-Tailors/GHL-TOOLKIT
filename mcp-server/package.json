@@ -1,0 +1,25 @@
+{
+  "name": "ghl-toolkit-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for GoHighLevel API v2 — Contacts, Pipelines, Calendars, Workflows, Custom Fields, Conversations, Webhooks",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "ghl-toolkit-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["mcp", "gohighlevel", "ghl", "crm", "funnel"],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
