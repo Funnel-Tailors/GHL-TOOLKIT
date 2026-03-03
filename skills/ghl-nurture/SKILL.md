@@ -82,9 +82,22 @@ Adaptados al qualification_status:
 4. **Definir timing**: Cuándo se envía cada mensaje
 5. **Configurar en GHL**: Instrucciones para crear los workflows en GHL UI
 
+## Memoria Compartida
+
+Si el directorio del proyecto tiene `.ghl/`, este skill:
+1. Lee `.ghl/analysis.md`, `.ghl/scoring-model.md`, `.ghl/infrastructure.md`
+2. Lanza el nurture sub-swarm (nurture-architect → nurture-copywriter)
+3. Escribe en `.ghl/nurture-strategy.md` y `.ghl/nurture-sequences.md`
+
+Si NO hay `.ghl/`, crea el directorio y lanza auditor + scoring primero.
+
 ## Agente Especialista
 
-Para secuencias de nurturing ultra-personalizadas con copy real (no placeholders), este skill es orquestado por el agente `ghl-nurture-strategist` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+Este skill es orquestado por el agente `ghl-nurture-strategist` (mini-director del nurture sub-swarm). En v3, el nurturing se descompone en:
+- `ghl-nurture-architect`: Diseña cadencias, timing, triggers, canales, estructura
+- `ghl-nurture-copywriter`: Escribe TODOS los mensajes SMS+Email con copy real
+
+Usa `/ghl-deploy` para el flujo completo con todos los sub-swarms.
 
 ## Reglas
 
@@ -93,4 +106,4 @@ Para secuencias de nurturing ultra-personalizadas con copy real (no placeholders
 - Emails deben ser cortos y escaneables. Max 200 palabras.
 - Siempre incluir opción de darse de baja / parar mensajes.
 - Usar el nombre del contacto ({{contact.first_name}}) en cada mensaje.
-- Los mensajes de WhatsApp deben cumplir las políticas de Meta.
+- Si `.ghl/` existe, los umbrales vienen de `scoring-model.md`. No inventar.

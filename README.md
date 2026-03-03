@@ -1,56 +1,77 @@
 # GHL-TOOLKIT
 
-Toolkit de Claude Code para GoHighLevel. MCP Server con 34 tools + 8 skills + 7 agents que trabajan como un swarm para desplegar funnels de cualificación completos desde una landing page existente.
+Toolkit de Claude Code para GoHighLevel. MCP Server con 34 tools + 8 skills + 16 agents organizados en sub-swarms con memoria compartida para desplegar funnels de cualificación completos desde una landing page existente.
 
-Un solo comando (`/ghl-deploy ./mi-proyecto`) analiza tu landing, diseña el scoring, construye la infraestructura en GHL, escribe las secuencias de nurturing, conecta el formulario, y configura Meta CAPI. Todo coordinado, todo coherente.
+Un solo comando (`/ghl-deploy ./mi-proyecto`) analiza tu landing, diseña el scoring con sub-agentes especializados, construye la infraestructura en GHL, escribe las secuencias de nurturing con copy real, conecta el formulario, y configura Meta CAPI. Todo coordinado via memoria compartida en `.ghl/`, todo coherente.
 
 ---
 
-## Swarm Architecture
+## Swarm Architecture v3
 
 ```
                          /ghl-deploy ./mi-proyecto
                                    │
                                    ▼
                     ┌──────────────────────────────┐
-                    │    ghl-project-architect      │
-                    │    (Director — Opus)           │
+                    │    ghl-deploy-director         │
+                    │    (Super-orquestador — Opus)   │
                     │                                │
-                    │  1. Lee la landing real         │
-                    │  2. Extrae oferta/avatar/ticket │
-                    │  3. Audita GHL actual           │
-                    │  4. Coordina las 4 fases        │
+                    │  State machine + validación     │
+                    │  cruzada + memoria compartida   │
                     └──────────┬───────────────────┘
                                │
               ┌────────────────┼────────────────┐
-              │           FASE 2: DISEÑO         │
-              │          (3 en paralelo)          │
-              ▼                ▼                  ▼
-     ┌────────────────┐ ┌───────────────┐ ┌──────────────┐
-     │ scoring-        │ │ funnel-        │ │ infra-        │
-     │ engineer        │ │ strategist     │ │ engineer      │
-     │ (Opus)          │ │ (Opus)         │ │ (Sonnet)      │
-     │                 │ │                │ │               │
-     │ Modelo de       │ │ Arquitectura   │ │ Custom fields │
-     │ scoring         │ │ del funnel     │ │ Pipeline      │
-     │ predictivo      │ │ + branching    │ │ Tags/Webhooks │
-     └────────┬───────┘ └───────┬───────┘ └──────┬───────┘
+              │         FASE 1: ANÁLISIS         │
+              │                                  │
+              ▼                                  │
+     ┌────────────────┐                          │
+     │ ghl-project-    │                          │
+     │ auditor (Sonnet)│                          │
+     │                 │                          │
+     │ → analysis.md   │                          │
+     │ → audit.md      │                          │
+     └────────┬───────┘                          │
+              │                                  │
+              ├──────── FASE 2: DISEÑO ──────────┤
+              │      (sub-swarms paralelos)       │
+              ▼                ▼                  │
+     ┌────────────────┐ ┌───────────────┐        │
+     │ SCORING         │ │ FUNNEL         │        │
+     │ sub-swarm       │ │ sub-swarm      │        │
+     │                 │ │                │        │
+     │ scoring-engineer│ │ funnel-        │        │
+     │ (mini-director) │ │ strategist     │        │
+     │   ├─ scoring-   │ │ (mini-director)│        │
+     │   │  modeler    │ │   ├─ funnel-   │        │
+     │   └─ scoring-   │ │   │  architect │        │
+     │      question-  │ │   └─ form-     │        │
+     │      designer   │ │      copywriter│        │
+     └────────┬───────┘ └───────┬───────┘        │
               │                 │                  │
-              └────────┬────────┴─────────┬───────┘
-                       │   VALIDACIÓN     │
-                       │   CRUZADA        │
-              ┌────────┴─────────┬────────┴───────┐
-              │          FASE 3: BUILD            │
-              │         (3 en paralelo)            │
+              └────────┬────────┘                  │
+                       ▼                           │
+              ┌────────────────┐                   │
+              │ ghl-infra-      │                   │
+              │ engineer        │                   │
+              │ (lee specs →    │                   │
+              │  crea en GHL)   │                   │
+              └────────┬───────┘                   │
+                       │ VALIDACIÓN CRUZADA        │
+              ┌────────┴──────────┬────────────────┘
+              │         FASE 3: BUILD               │
+              │      (sub-swarms paralelos)          │
               ▼                ▼                   ▼
      ┌────────────────┐ ┌───────────────┐ ┌──────────────┐
-     │ nurture-        │ │ integration-   │ │ capi-         │
-     │ strategist      │ │ engineer       │ │ engineer      │
-     │ (Opus)          │ │ (Sonnet)       │ │ (Sonnet)      │
-     │                 │ │                │ │               │
-     │ Secuencias SMS  │ │ Form handler   │ │ Server-side   │
-     │ + Email con     │ │ API routes     │ │ event tracking│
-     │ copy real       │ │ Tracking       │ │ para Meta     │
+     │ NURTURE         │ │ integration-   │ │ CAPI          │
+     │ sub-swarm       │ │ engineer       │ │ sub-swarm     │
+     │                 │ │ (Sonnet)       │ │               │
+     │ nurture-        │ │                │ │ capi-engineer  │
+     │ strategist      │ │ Form handler   │ │ (mini-director)│
+     │ (mini-director) │ │ API routes     │ │   ├─ capi-    │
+     │   ├─ nurture-   │ │ Tracking       │ │   │  strategist│
+     │   │  architect  │ │                │ │   └─ capi-    │
+     │   └─ nurture-   │ │                │ │      implementer│
+     │      copywriter │ │                │ │               │
      └────────────────┘ └───────────────┘ └──────────────┘
               │                 │                  │
               └────────────────┼──────────────────┘
@@ -58,13 +79,35 @@ Un solo comando (`/ghl-deploy ./mi-proyecto`) analiza tu landing, diseña el sco
                     ┌──────────────────────────────┐
                     │      FASE 4: VALIDACIÓN       │
                     │                                │
-                    │  Coherencia entre todas las     │
-                    │  piezas + reporte final         │
+                    │  Coherencia total + reporte     │
+                    │  Todo en .ghl/ del proyecto     │
                     └──────────────────────────────┘
-                               │
-                               ▼
-                          GHL API v2
-                      (via MCP Server)
+```
+
+---
+
+## Memoria Compartida: `.ghl/`
+
+Cada agente escribe UN archivo en el directorio `.ghl/` del proyecto. Múltiples agentes leen. Sin conflictos por diseño.
+
+```
+mi-proyecto/.ghl/
+├── state.json                    # State machine (solo deploy-director)
+├── config.json                   # Metadata del proyecto
+├── analysis.md                   # ← project-auditor
+├── audit.md                      # ← project-auditor
+├── scoring-model.md              # ← scoring-modeler
+├── scoring-questions.md          # ← scoring-question-designer
+├── funnel-architecture.md        # ← funnel-architect
+├── form-copy.md                  # ← form-copywriter
+├── infrastructure.md             # ← infra-engineer
+├── nurture-strategy.md           # ← nurture-architect
+├── nurture-sequences.md          # ← nurture-copywriter
+├── integration-code.md           # ← integration-engineer
+├── capi-strategy.md              # ← capi-strategist
+├── capi-config.md                # ← capi-implementer
+├── validation-final.md           # ← deploy-director
+└── report.md                     # ← deploy-director
 ```
 
 ---
@@ -95,34 +138,53 @@ cp .env.example .env.local
 
 ## Skills (8)
 
-Comandos que se invocan directamente en Claude Code con `/nombre`.
+Comandos que se invocan directamente en Claude Code con `/nombre`. Cada uno lanza su propio sub-swarm si `.ghl/` existe.
 
-| Skill | Qué hace | Argumento |
+| Skill | Qué hace | Sub-swarm |
 |---|---|---|
-| `/ghl-deploy` | Deploy completo end-to-end. Orquesta los 6 especialistas en 4 fases para montar todo el funnel. | `[project-path]` |
-| `/ghl-setup` | Infraestructura base: custom fields, pipeline, webhooks, tags. | `[project-name]` |
-| `/ghl-qualify` | Diseñar criterios de scoring o cualificar un lead específico. | `[project-name \| contact-id]` |
-| `/ghl-funnel` | Arquitectura del funnel: formulario multi-step, branching, experiencias por score. | `[project-name \| landing-url]` |
-| `/ghl-nurture` | Secuencias de nurturing personalizadas (SMS + Email) adaptadas al score. | `[project-name \| sequence-type]` |
-| `/ghl-connect` | Conectar landing page con GHL: form handler, tracking, UTMs, webhook. | `[project-path \| landing-url]` |
-| `/ghl-capi` | Configurar Meta Conversions API con eventos server-side enriquecidos. | `[project-name]` |
-| `/ghl-audit` | Auditoría completa de una location GHL: gaps, problemas, oportunidades. | — |
+| `/ghl-deploy` | Deploy completo end-to-end. Orquesta 16 agentes en 4 fases con sub-swarms paralelos. | Todos |
+| `/ghl-setup` | Infraestructura base: custom fields, pipeline, webhooks, tags. | infra-engineer |
+| `/ghl-qualify` | Diseñar modelo de scoring + preguntas de cualificación. | scoring-modeler + question-designer |
+| `/ghl-funnel` | Arquitectura del funnel + copy del formulario multi-step. | funnel-architect + form-copywriter |
+| `/ghl-nurture` | Secuencias de nurturing personalizadas (SMS + Email) con copy real. | nurture-architect + nurture-copywriter |
+| `/ghl-connect` | Conectar landing page con GHL: form handler, tracking, UTMs, webhook. | integration-engineer |
+| `/ghl-capi` | Configurar Meta CAPI con eventos server-side enriquecidos. | capi-strategist + capi-implementer |
+| `/ghl-audit` | Auditoría completa de una location GHL: gaps, problemas, oportunidades. | project-auditor |
 
 ---
 
-## Agents (7)
+## Agents (16)
 
-Agentes especializados que trabajan como swarm coordinado por el `project-architect`.
+### Nivel 1: Super-Orquestador
 
 | Agent | Modelo | Rol |
 |---|---|---|
-| `ghl-project-architect` | Opus | Director del swarm. Analiza el proyecto, diseña la estrategia macro, coordina las 4 fases, valida coherencia. |
-| `ghl-scoring-engineer` | Opus | Diseña modelos de scoring predictivo: criterios, pesos, umbrales, decay rules. |
-| `ghl-funnel-strategist` | Opus | Diseña la arquitectura del funnel: formularios como micro-compromisos, branching por score, experiencias diferenciadas. |
-| `ghl-infra-engineer` | Sonnet | Construye la infraestructura en GHL vía API: custom fields, pipeline, tags, webhooks. Audita antes de crear. |
-| `ghl-nurture-strategist` | Opus | Escribe secuencias de nurturing con copy real personalizado. Cada mensaje como conversación 1-on-1, no newsletter. |
-| `ghl-integration-engineer` | Sonnet | Conecta la landing real con GHL: lee el código, identifica el framework, genera form handlers y API routes exactos. |
-| `ghl-capi-engineer` | Sonnet | Configura Meta CAPI para que el algoritmo optimice hacia leads de calidad, no volumen. |
+| `ghl-deploy-director` | Opus | Super-orquestador. State machine, validaciones cruzadas entre fases, reporte final. Resume de interrupciones. |
+
+### Nivel 2: Mini-Directors + Agentes Solo
+
+| Agent | Modelo | Rol |
+|---|---|---|
+| `ghl-scoring-engineer` | Opus | Mini-director del scoring sub-swarm. Lanza modeler → question-designer → valida. |
+| `ghl-funnel-strategist` | Opus | Mini-director del funnel sub-swarm. Lanza architect → copywriter → valida. Espera a scoring-questions.md. |
+| `ghl-nurture-strategist` | Opus | Mini-director del nurture sub-swarm. Lanza architect → copywriter → valida. |
+| `ghl-capi-engineer` | Sonnet | Mini-director del CAPI sub-swarm. Lanza strategist → implementer → valida. |
+| `ghl-infra-engineer` | Sonnet | Lee specs de scoring + funnel de .ghl/ antes de crear. Ya no adivina. |
+| `ghl-integration-engineer` | Sonnet | Lee IDs reales de .ghl/infrastructure.md. Field mapping exacto. |
+| `ghl-project-auditor` | Sonnet | Análisis de landing + auditoría GHL. Solo recolección de datos en Phase 1. |
+
+### Nivel 3: Sub-Agentes Especializados
+
+| Agent | Modelo | Sub-swarm | Rol |
+|---|---|---|---|
+| `ghl-scoring-modeler` | Opus | Scoring | Modelo matemático: dimensiones, pesos, umbrales, decay, señales negativas. |
+| `ghl-scoring-question-designer` | Opus | Scoring | Preguntas naturales con mapeo de puntos. Voz coherente con la landing. |
+| `ghl-funnel-architect` | Opus | Funnel | Tipo de funnel, flujo, steps, branching, thank-you pages diferenciadas. |
+| `ghl-form-copywriter` | Opus | Funnel | Micro-copy: botones, progreso, social proof, errores, CTAs de thank-you. |
+| `ghl-nurture-architect` | Opus | Nurture | Cadencias por score, timing, triggers, canales, estructura de secuencias. |
+| `ghl-nurture-copywriter` | Opus | Nurture | Copy REAL de todos los mensajes SMS+Email. Personalizado al avatar. |
+| `ghl-capi-strategist` | Sonnet | CAPI | Estrategia de attribution: eventos, EMQ, deduplicación, optimization event. |
+| `ghl-capi-implementer` | Sonnet | CAPI | Código CAPI: endpoints, SHA-256 hashing, workflows, testing. |
 
 ---
 
@@ -220,18 +282,28 @@ GHL-TOOLKIT/
 ├── .gitignore
 ├── sync.sh                   # Sincroniza skills/agents a ~/.claude/
 │
-├── agents/                   # 7 agentes del swarm
-│   ├── ghl-project-architect.md
-│   ├── ghl-scoring-engineer.md
-│   ├── ghl-funnel-strategist.md
-│   ├── ghl-infra-engineer.md
-│   ├── ghl-nurture-strategist.md
-│   ├── ghl-integration-engineer.md
-│   └── ghl-capi-engineer.md
+├── agents/                   # 16 agentes del swarm v3
+│   ├── ghl-deploy-director.md         # Super-orquestador
+│   ├── ghl-project-auditor.md         # Análisis + auditoría
+│   ├── ghl-scoring-engineer.md        # Mini-director scoring
+│   ├── ghl-scoring-modeler.md         # Sub-agente: modelo matemático
+│   ├── ghl-scoring-question-designer.md # Sub-agente: preguntas
+│   ├── ghl-funnel-strategist.md       # Mini-director funnel
+│   ├── ghl-funnel-architect.md        # Sub-agente: arquitectura
+│   ├── ghl-form-copywriter.md         # Sub-agente: copy del form
+│   ├── ghl-infra-engineer.md          # Infraestructura GHL
+│   ├── ghl-nurture-strategist.md      # Mini-director nurture
+│   ├── ghl-nurture-architect.md       # Sub-agente: cadencias
+│   ├── ghl-nurture-copywriter.md      # Sub-agente: copy mensajes
+│   ├── ghl-integration-engineer.md    # Integración landing↔GHL
+│   ├── ghl-capi-engineer.md           # Mini-director CAPI
+│   ├── ghl-capi-strategist.md         # Sub-agente: estrategia
+│   └── ghl-capi-implementer.md        # Sub-agente: implementación
 │
 ├── skills/                   # 8 skills invocables
 │   ├── ghl-deploy/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── MEMORY-PROTOCOL.md       # Protocolo de memoria compartida
 │   ├── ghl-setup/
 │   │   ├── SKILL.md
 │   │   └── INFRASTRUCTURE.md
@@ -296,80 +368,30 @@ Copiar `.env.example` a `.env.local` y rellenar:
 
 ---
 
-## Uso Individual de Skills
-
-### `/ghl-deploy` — Deploy completo
-```
-/ghl-deploy ./webinardos
-```
-Analiza la landing, lanza el swarm de 6 agentes en 4 fases, y entrega el funnel completo con reporte.
-
-### `/ghl-setup` — Infraestructura base
-```
-/ghl-setup mi-proyecto
-```
-Verifica credenciales, audita el estado actual, y crea custom fields + pipeline + tags + webhooks.
-
-### `/ghl-qualify` — Scoring
-```
-/ghl-qualify mi-proyecto           # Diseñar criterios de scoring
-/ghl-qualify abc123-contact-id     # Cualificar un lead específico
-```
-Diseña modelos de scoring predictivo o aplica scoring a un contacto real.
-
-### `/ghl-funnel` — Arquitectura del funnel
-```
-/ghl-funnel mi-landing
-```
-Diseña el formulario multi-step, branching logic, y experiencias diferenciadas por score.
-
-### `/ghl-nurture` — Secuencias de nurturing
-```
-/ghl-nurture mi-proyecto
-```
-Crea secuencias completas de SMS + Email con copy real personalizado al avatar y scoring model.
-
-### `/ghl-connect` — Conectar landing
-```
-/ghl-connect ./mi-landing
-```
-Lee el código de la landing, genera form handlers, API routes, behavior tracking, y hidden fields para UTMs.
-
-### `/ghl-capi` — Meta CAPI
-```
-/ghl-capi mi-proyecto
-```
-Configura server-side tracking con eventos enriquecidos para que Meta optimice hacia leads de calidad.
-
-### `/ghl-audit` — Auditoría
-```
-/ghl-audit
-```
-Revisa la location completa: campos huérfanos, workflows inactivos, pipeline sin stages, tags sin uso.
-
----
-
 ## Flujo End-to-End
 
-Cuando ejecutas `/ghl-deploy`, el swarm trabaja en 4 fases:
+Cuando ejecutas `/ghl-deploy`, el swarm trabaja en 4 fases con sub-swarms especializados:
 
 ### Fase 1 — Análisis
-El `project-architect` lee el código real de la landing page y extrae: propuesta de valor, avatar, ticket, objeciones, nivel de awareness, mecanismo de conversión, voz de marca, y framework técnico. Luego audita el estado actual de GHL (campos, pipelines, tags, webhooks existentes).
+El `project-auditor` lee el código real de la landing page y extrae: propuesta de valor, avatar, ticket, objeciones, nivel de awareness, mecanismo de conversión, voz de marca, y framework técnico. Luego audita el estado actual de GHL. Todo se escribe en `.ghl/analysis.md` y `.ghl/audit.md`.
 
-### Fase 2 — Diseño (3 agentes en paralelo)
-- **scoring-engineer**: Diseña el modelo de scoring predictivo con criterios, pesos, umbrales y decay rules específicos para ese negocio.
-- **funnel-strategist**: Diseña la arquitectura del funnel con formulario multi-step, branching logic, y experiencias diferenciadas por score.
-- **infra-engineer**: Crea la infraestructura base en GHL vía API (custom fields, pipeline, tags, webhooks).
+### Fase 2 — Diseño (sub-swarms paralelos)
+- **Scoring sub-swarm**: El `scoring-modeler` diseña el modelo matemático (dimensiones, pesos, umbrales, decay). Luego el `scoring-question-designer` traduce las señales en preguntas naturales con mapeo de puntos.
+- **Funnel sub-swarm**: El `funnel-architect` diseña la arquitectura (tipo, flujo, branching, thank-you pages). Luego el `form-copywriter` escribe todo el micro-copy del form (espera a que las scoring-questions estén listas).
+- **Infra** (después de scoring + funnel): El `infra-engineer` LEE las specs de los sub-swarms anteriores y crea exactamente lo que necesitan en GHL vía API.
 
-El `project-architect` valida la coherencia entre los 3 outputs antes de continuar.
+El `deploy-director` valida coherencia entre los 3 outputs antes de continuar.
 
-### Fase 3 — Build (3 agentes en paralelo)
-- **nurture-strategist**: Escribe secuencias completas de SMS + Email con copy real (no placeholders) adaptado al score y etapa del journey.
-- **integration-engineer**: Genera el código exacto de integración para el framework de la landing (form handlers, API routes, tracking scripts).
-- **capi-engineer**: Configura Meta CAPI con eventos server-side que reportan calidad del lead, no solo volumen.
+### Fase 3 — Build (sub-swarms paralelos)
+- **Nurture sub-swarm**: El `nurture-architect` diseña cadencias y estructura. El `nurture-copywriter` escribe TODOS los mensajes SMS+Email con copy real personalizado.
+- **Integration**: El `integration-engineer` genera código exacto para el framework de la landing, usando IDs reales de `.ghl/infrastructure.md`.
+- **CAPI sub-swarm**: El `capi-strategist` diseña la estrategia de attribution y EMQ. El `capi-implementer` produce el código de endpoints, hashing, y workflows.
 
 ### Fase 4 — Validación
-El `project-architect` cruza todos los outputs y verifica que: los umbrales de scoring coinciden en todas las piezas, los custom fields creados en GHL coinciden con los que envía el integration code, los workflows de nurturing se activan en los stages correctos, y los eventos CAPI se disparan en los momentos adecuados. Entrega un reporte final con todo lo implementado + pasos manuales pendientes.
+El `deploy-director` cruza TODOS los outputs y verifica coherencia total: umbrales de scoring en todas las piezas, custom fields creados vs enviados, workflows correctamente enlazados, eventos CAPI en los momentos adecuados. Entrega `report.md` con todo lo implementado.
+
+### Resume
+Si un deploy se interrumpe, al relanzar detecta `.ghl/state.json` y resume desde el punto exacto sin re-ejecutar agentes completados.
 
 ---
 

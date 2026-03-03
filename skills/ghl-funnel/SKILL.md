@@ -89,17 +89,30 @@ Proponer siempre al menos 3 tests:
 4. **Primer mensaje post-form**: SMS vs email vs WhatsApp
 5. **Timing del primer recordatorio**: 24h vs 12h vs 6h antes
 
+## Memoria Compartida
+
+Si el directorio del proyecto tiene `.ghl/`, este skill:
+1. Lee `.ghl/analysis.md` para contexto
+2. Lanza el funnel sub-swarm (funnel-architect → form-copywriter)
+3. Espera a `.ghl/scoring-questions.md` antes de lanzar el copywriter
+4. Escribe en `.ghl/funnel-architecture.md` y `.ghl/form-copy.md`
+
+Si NO hay `.ghl/`, crea el directorio y lanza primero al auditor.
+
 ## Agente Especialista
 
-Para un diseño de funnel profundo con psicología de conversión, micro-commitments, y branching avanzado por score, este skill es orquestado por el agente `ghl-funnel-strategist` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+Este skill es orquestado por el agente `ghl-funnel-strategist` (mini-director del funnel sub-swarm). En v3, el funnel se descompone en:
+- `ghl-funnel-architect`: Diseña tipo, flujo, steps, branching, thank-you pages
+- `ghl-form-copywriter`: Escribe todo el micro-copy del form (botones, progreso, errores, CTAs)
+
+Usa `/ghl-deploy` para el flujo completo con todos los sub-swarms.
 
 ## Output
 
-Entregar:
-1. Diagrama del funnel (texto/ASCII)
-2. Preguntas de cualificación con scoring
+Entregar (en `.ghl/`):
+1. Diagrama del funnel (texto/ASCII) en `funnel-architecture.md`
+2. Especificación técnica JSON para implementación
 3. Lógica de branching
-4. Secuencias de nurturing recomendadas
-5. Configuración de CAPI
-6. Métricas y KPIs target
-7. Primeros 3 tests A/B a ejecutar
+4. Copy completo del form en `form-copy.md`
+5. Métricas y KPIs target
+6. Primeros 3 tests A/B a ejecutar

@@ -102,9 +102,22 @@ Para cada proyecto, crear Custom Conversions en Meta Ads Manager:
 
 Esto permite optimizar campañas específicamente para cada etapa del funnel.
 
+## Memoria Compartida
+
+Si el directorio del proyecto tiene `.ghl/`, este skill:
+1. Lee `.ghl/scoring-model.md`, `.ghl/funnel-architecture.md`, `.ghl/infrastructure.md`
+2. Lanza el CAPI sub-swarm (capi-strategist → capi-implementer)
+3. Escribe en `.ghl/capi-strategy.md` y `.ghl/capi-config.md`
+
+Si NO hay `.ghl/`, funciona en modo standalone con configuración básica.
+
 ## Agente Especialista
 
-Para una configuración CAPI profunda con optimización de EMQ, event selection por volumen, y value-based optimization, este skill es orquestado por el agente `ghl-capi-engineer` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+Este skill es orquestado por el agente `ghl-capi-engineer` (mini-director del CAPI sub-swarm). En v3, CAPI se descompone en:
+- `ghl-capi-strategist`: Diseña estrategia de attribution, EMQ, event selection, deduplicación
+- `ghl-capi-implementer`: Produce código de endpoints, hashing, workflows, testing
+
+Usa `/ghl-deploy` para el flujo completo con todos los sub-swarms.
 
 ## Reglas
 
@@ -113,3 +126,4 @@ Para una configuración CAPI profunda con optimización de EMQ, event selection 
 - Enviar hashed PII (email, phone, name) — GHL lo hace automáticamente via CAPI nativo
 - Testear en Meta Events Manager → Test Events antes de activar en producción
 - Verificar que no hay eventos duplicados (browser pixel + server CAPI)
+- Si `.ghl/scoring-model.md` existe, usar sus umbrales para eventos. No inventar.

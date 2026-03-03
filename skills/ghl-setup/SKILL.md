@@ -70,12 +70,22 @@ Mostrar resumen de todo lo configurado:
 - Webhooks registrados
 - Próximos pasos recomendados
 
+## Memoria Compartida
+
+Si el directorio del proyecto tiene `.ghl/`, este skill:
+1. Lee `.ghl/scoring-model.md` y `.ghl/funnel-architecture.md` para saber qué campos crear
+2. Escribe su output en `.ghl/infrastructure.md` con frontmatter YAML
+3. Otros agentes del swarm leerán los IDs de ahí
+
+Si NO hay `.ghl/`, crea infraestructura estándar basada en las reglas de INFRASTRUCTURE.md.
+
 ## Agente Especialista
 
-Para un despliegue completo end-to-end (no solo infraestructura base), este skill es orquestado por el agente `ghl-infra-engineer` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+Este skill es orquestado por el agente `ghl-infra-engineer` dentro del swarm v3. En un deploy completo (`/ghl-deploy`), el infra-engineer lee las specs de los sub-swarms de scoring y funnel desde `.ghl/` antes de crear nada — ya no adivina qué campos necesita.
 
 ## Reglas
 - NUNCA crear duplicados. Siempre verificar primero.
 - Si un campo ya existe con nombre similar, preguntar antes de crear uno nuevo.
 - Guardar los IDs de todo lo creado para referencia futura.
 - El nombre del proyecto es `$ARGUMENTS` si se proporcionó.
+- Si `.ghl/` existe, leer specs antes de crear. Si no, usar defaults.

@@ -98,9 +98,21 @@ Si es posible con el framework del proyecto:
 
 Ver [WEBHOOK-PATTERNS.md](WEBHOOK-PATTERNS.md) para patrones detallados.
 
+## Memoria Compartida
+
+Si el directorio del proyecto tiene `.ghl/`, este skill:
+1. Lee `.ghl/infrastructure.md` para IDs reales de custom fields y webhooks
+2. Lee `.ghl/scoring-model.md`, `.ghl/funnel-architecture.md`, `.ghl/form-copy.md` para specs
+3. Produce código con field mapping EXACTO basado en IDs reales
+4. Escribe en `.ghl/integration-code.md`
+
+Si NO hay `.ghl/`, funciona en modo standalone leyendo solo el código de la landing.
+
 ## Agente Especialista
 
-Para una integración completa que lea el código real de la landing y genere código production-ready específico al framework, este skill es orquestado por el agente `ghl-integration-engineer` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+Este skill es orquestado por el agente `ghl-integration-engineer`. En v3, el integration engineer lee de `.ghl/` para obtener IDs reales de custom fields, webhooks, y pipeline stages — ya no adivina ni hardcodea IDs.
+
+Usa `/ghl-deploy` para el flujo completo con todos los sub-swarms.
 
 ## Reglas
 
@@ -111,3 +123,4 @@ Para una integración completa que lea el código real de la landing y genere c�
 - Siempre incluir event_id para deduplicación Meta CAPI
 - Si el proyecto usa Next.js, preferir Server Actions o API Routes
 - Si es HTML puro, usar fetch directo al webhook/API
+- Si `.ghl/infrastructure.md` existe, usar IDs reales de ahí. NUNCA inventar IDs.

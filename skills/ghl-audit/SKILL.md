@@ -97,9 +97,18 @@ Fecha: [fecha]
 5. [LOW] Añadir stage "Cita Confirmada" al pipeline
 ```
 
+## Memoria Compartida
+
+Si el directorio del proyecto tiene `.ghl/`, este skill compara el estado actual de GHL contra las specs del swarm:
+- Lee `.ghl/infrastructure.md` para verificar que todo lo planeado se creó
+- Lee `.ghl/scoring-model.md` para verificar campos de scoring
+- Escribe el reporte de auditoría como información complementaria
+
 ## Agente Especialista
 
-La auditoría forma parte de la FASE 4 (Validación) del swarm del `ghl-project-architect`. El director usa esta checklist para verificar coherencia después de que los 6 especialistas terminan. Usa `/ghl-deploy` para el flujo completo.
+La auditoría forma parte de la FASE 1 (Análisis) y FASE 4 (Validación) del swarm v3. El `ghl-project-auditor` genera `audit.md` en Phase 1, y el `ghl-deploy-director` usa este checklist en Phase 4 para validación final.
+
+Usa `/ghl-deploy` para el flujo completo.
 
 ## Reglas
 

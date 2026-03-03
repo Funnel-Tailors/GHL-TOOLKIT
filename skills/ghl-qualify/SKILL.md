@@ -73,9 +73,22 @@ Basado en interacción post-formulario:
 | **COLD** | 20–39 | Nurturing suave. Puede reactivarse. |
 | **DISQUALIFIED** | < 20 | No encaja. Marcar y no invertir recursos. |
 
+## Memoria Compartida
+
+Si el directorio del proyecto tiene `.ghl/`, este skill:
+1. Lee `.ghl/analysis.md` para contexto del proyecto
+2. Lanza el scoring sub-swarm completo (scoring-modeler → scoring-question-designer)
+3. Escribe outputs en `.ghl/scoring-model.md` y `.ghl/scoring-questions.md`
+
+Si NO hay `.ghl/`, crea el directorio y lanza primero al `ghl-project-auditor` para generar `analysis.md`.
+
 ## Agente Especialista
 
-Para un diseño de scoring profundo, predictivo y adaptado al proyecto real, este skill es orquestado por el agente `ghl-scoring-engineer` dentro del swarm del `ghl-project-architect`. Usa `/ghl-deploy` para el flujo completo.
+Este skill es orquestado por el agente `ghl-scoring-engineer` (mini-director del scoring sub-swarm). En v3, el scoring se descompone en:
+- `ghl-scoring-modeler`: Diseña el modelo matemático (dimensiones, pesos, umbrales, decay)
+- `ghl-scoring-question-designer`: Traduce señales en preguntas naturales con mapeo de puntos
+
+Usa `/ghl-deploy` para el flujo completo con todos los sub-swarms.
 
 ## Reglas
 
@@ -84,3 +97,4 @@ Para un diseño de scoring profundo, predictivo y adaptado al proyecto real, est
 - NUNCA sobrescribir un score sin mostrar antes el anterior y el nuevo.
 - Si un contacto ya tiene score, preguntar antes de recalcular.
 - Documentar las reglas de cada proyecto para que sean reproducibles.
+- Si `.ghl/` existe, leer de ahí. Si no, crear y lanzar auditor primero.
