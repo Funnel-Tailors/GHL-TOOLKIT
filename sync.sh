@@ -52,3 +52,17 @@ for agent_file in "$TOOLKIT_DIR"/agents/*.md; do
   filename=$(basename "$agent_file" .md)
   echo "  $filename"
 done
+
+echo ""
+
+# --- Templates ---
+TEMPLATES_DIR="$TOOLKIT_DIR/templates"
+if [ -d "$TEMPLATES_DIR" ]; then
+  echo "Templates disponibles:"
+  for template_file in "$TEMPLATES_DIR"/*.yaml; do
+    [ -f "$template_file" ] || continue
+    name=$(basename "$template_file" .yaml)
+    [ "$name" = "_base" ] && continue
+    echo "  $name"
+  done
+fi

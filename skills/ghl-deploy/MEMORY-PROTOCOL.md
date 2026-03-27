@@ -241,3 +241,66 @@ Si un deploy se interrumpe, el deploy-director:
 2. Identifica la fase actual y agentes completados
 3. Resume desde el punto exacto de interrupción
 4. NO re-ejecuta agentes que ya tienen output con `status: completed`
+
+---
+
+## Browser Automation Memory (v4)
+
+Los agentes del browser sub-swarm siguen el mismo principio: cada agente escribe UN archivo.
+
+### Estructura adicional para operaciones de browser
+
+```
+mi-proyecto/.ghl/
+├── ... (archivos existentes del deploy) ...
+│
+├── browser-state.json            # ← browser-director (estado operación)
+├── batch-queue.json              # ← browser-director (cola del batch)
+├── browser-auth.md               # ← browser-auth (estado de sesión)
+├── accounts-created.md           # ← browser-director (resumen batch)
+│
+└── accounts/
+    ├── cuenta-nombre-1/
+    │   ├── config.json           # ← account-creator (location_id, api_key)
+    │   ├── creation.md           # ← account-creator (detalles de creación)
+    │   └── setup.md              # ← pipeline/workflow/calendar builders
+    └── cuenta-nombre-2/
+        └── ...
+```
+
+### Tabla de Dependencias — Browser Agents
+
+| Agente | Lee | Escribe |
+|--------|-----|---------|
+| browser-auth | secrets.env / env vars | `browser-auth.md` |
+| account-creator | Template YAML, datos cuenta | `accounts/<name>/config.json`, `accounts/<name>/creation.md` |
+| pipeline-builder | Template YAML, `accounts/<name>/config.json` | `accounts/<name>/setup.md` (sección pipeline) |
+| calendar-builder | Template YAML, `accounts/<name>/config.json` | `accounts/<name>/setup.md` (sección calendar) |
+| workflow-builder | Template YAML, `accounts/<name>/config.json`, `accounts/<name>/setup.md` | `accounts/<name>/setup.md` (sección workflows) |
+| integration-configurator | Template YAML, `accounts/<name>/config.json` | `accounts/<name>/setup.md` (sección integrations) |
+| browser-director | Todo lo anterior | `batch-queue.json`, `browser-state.json`, `accounts-created.md` |
+
+### Frontmatter para Browser Agents
+
+Mismo formato que los agentes API, con `phase: browser`:
+
+```yaml
+---
+agent: ghl-account-creator
+phase: browser
+status: completed
+created_at: 2026-03-26T10:15:00Z
+account_name: "Clínica Madrid"
+location_id: "abc123"
+dependencies_read:
+  - templates/dental-clinic.yaml
+---
+```
+
+### Interacción Browser ↔ API
+
+El punto de integración clave es el **handoff de credenciales**:
+1. `account-creator` captura Location ID + API Key via browser
+2. Los escribe en `accounts/<name>/config.json`
+3. `browser-director` pasa estas credenciales a los agentes API existentes
+4. `infra-engineer` usa las nuevas credenciales para crear custom fields via API

@@ -1,0 +1,180 @@
+# GHL-TOOLKIT Base Template
+# Defaults compartidos por todos los templates.
+# Los templates específicos sobreescriben estos valores.
+
+name: _base
+description: "Configuración base por defecto para cualquier tipo de negocio"
+version: "1.0"
+
+# Configuración de cuenta
+account:
+  business_type: "Other"
+  timezone: "Europe/Madrid"
+  country: "ES"
+  snapshot_id: null
+
+# Pipeline estándar
+pipeline:
+  name: "Funnel Principal"
+  stages:
+    - name: "Lead Entrante"
+      order: 1
+    - name: "Cualificando"
+      order: 2
+    - name: "Cualificado HOT"
+      order: 3
+    - name: "Cualificado WARM"
+      order: 4
+    - name: "Cita Agendada"
+      order: 5
+    - name: "Cita Confirmada"
+      order: 6
+    - name: "Cita Completada"
+      order: 7
+    - name: "Cliente"
+      order: 8
+    - name: "Descartado"
+      order: 9
+
+# Custom Fields estándar (creados via API)
+custom_fields:
+  # Scoring
+  - name: lead_score
+    type: NUMERICAL
+    purpose: "Score total de cualificación (0-100)"
+  - name: response_score
+    type: NUMERICAL
+    purpose: "Score de respuestas del formulario (0-50)"
+  - name: behavior_score
+    type: NUMERICAL
+    purpose: "Score de comportamiento en página (0-30)"
+  - name: engagement_level
+    type: SINGLE_OPTIONS
+    purpose: "Nivel de engagement del lead"
+    options: ["HIGH", "MEDIUM", "LOW"]
+  - name: qualification_status
+    type: SINGLE_OPTIONS
+    purpose: "Estado de cualificación"
+    options: ["HOT", "WARM", "COLD", "DISQUALIFIED"]
+  - name: qualification_date
+    type: DATE
+    purpose: "Fecha de cualificación"
+
+  # Tracking
+  - name: source_funnel
+    type: TEXT
+    purpose: "Nombre del funnel de origen"
+  - name: utm_source
+    type: TEXT
+    purpose: "UTM source"
+  - name: utm_medium
+    type: TEXT
+    purpose: "UTM medium"
+  - name: utm_campaign
+    type: TEXT
+    purpose: "UTM campaign"
+  - name: utm_content
+    type: TEXT
+    purpose: "UTM content"
+  - name: utm_term
+    type: TEXT
+    purpose: "UTM term"
+  - name: landing_url
+    type: TEXT
+    purpose: "URL de la landing page de origen"
+
+  # Form data
+  - name: form_responses
+    type: LARGE_TEXT
+    purpose: "JSON con respuestas del formulario"
+  - name: form_step_reached
+    type: NUMERICAL
+    purpose: "Último paso alcanzado en el formulario"
+
+  # Behavior
+  - name: time_on_page
+    type: NUMERICAL
+    purpose: "Segundos en la página"
+  - name: scroll_depth
+    type: NUMERICAL
+    purpose: "Porcentaje de scroll (0-100)"
+
+  # CAPI
+  - name: fb_click_id
+    type: TEXT
+    purpose: "Facebook Click ID (fbc)"
+  - name: fb_browser_id
+    type: TEXT
+    purpose: "Facebook Browser ID (fbp)"
+  - name: capi_events_sent
+    type: LARGE_TEXT
+    purpose: "JSON de eventos CAPI enviados"
+
+# Calendario por defecto
+calendar:
+  name: "Consulta Inicial"
+  type: event
+  duration: 30
+  buffer: 15
+  availability:
+    monday: "09:00-18:00"
+    tuesday: "09:00-18:00"
+    wednesday: "09:00-18:00"
+    thursday: "09:00-18:00"
+    friday: "09:00-14:00"
+    saturday: null
+    sunday: null
+
+# Workflows básicos
+workflows:
+  - name: "Nuevo Lead - Bienvenida"
+    trigger: contact_created
+    actions:
+      - type: send_sms
+        delay: 0
+        content: "¡Hola {{contact.first_name}}! Gracias por tu interés. Te contactamos pronto."
+      - type: send_email
+        delay: 0
+        content: "Email de bienvenida con info del servicio"
+      - type: add_tag
+        delay: 0
+        config:
+          tag: "lead-nuevo"
+
+  - name: "Recordatorio de Cita -24h"
+    trigger: appointment_booked
+    actions:
+      - type: wait
+        delay: "-24h"
+      - type: send_sms
+        content: "Recordatorio: tu cita es mañana. ¿Sigues confirmado/a? Responde SÍ para confirmar."
+
+  - name: "Recordatorio de Cita -2h"
+    trigger: appointment_booked
+    actions:
+      - type: wait
+        delay: "-2h"
+      - type: send_sms
+        content: "Tu cita es en 2 horas. Te esperamos. Si necesitas cambiarla, avísanos."
+
+# Integraciones
+integrations:
+  meta_pixel: false
+  stripe: false
+  google_calendar: false
+
+# Tags estándar
+tags:
+  - "lead-nuevo"
+  - "contactado"
+  - "cualificado-hot"
+  - "cualificado-warm"
+  - "cualificado-cold"
+  - "descartado"
+  - "cita-agendada"
+  - "cita-confirmada"
+  - "cita-completada"
+  - "cita-no-show"
+  - "cliente-activo"
+  - "nurture-activo"
+  - "nurture-completado"

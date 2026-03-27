@@ -1,8 +1,10 @@
 # GHL-TOOLKIT
 
-Toolkit de Claude Code para GoHighLevel. MCP Server con 34 tools + 8 skills + 16 agents organizados en sub-swarms con memoria compartida para desplegar funnels de cualificación completos desde una landing page existente.
+Toolkit de Claude Code para GoHighLevel. MCP Server con 34 API tools + 11 skills + 23 agents organizados en sub-swarms con memoria compartida. Despliega funnels de cualificación completos y crea/configura sub-cuentas en batch via automatización de navegador.
 
-Un solo comando (`/ghl-deploy ./mi-proyecto`) analiza tu landing, diseña el scoring con sub-agentes especializados, construye la infraestructura en GHL, escribe las secuencias de nurturing con copy real, conecta el formulario, y configura Meta CAPI. Todo coordinado via memoria compartida en `.ghl/`, todo coherente.
+**v3 (API)**: Un solo comando (`/ghl-deploy ./mi-proyecto`) analiza tu landing, diseña el scoring, construye la infraestructura en GHL, escribe las secuencias de nurturing con copy real, conecta el formulario, y configura Meta CAPI. Todo coordinado via memoria compartida en `.ghl/`.
+
+**v4 (Browser)**: Nuevo browser sub-swarm con Playwright MCP. Crea sub-cuentas desde el dashboard de agencia, monta pipelines, calendarios, workflows, e integraciones — todo lo que la API no puede hacer. `/ghl-batch-create` para crear muchas cuentas de golpe con templates reutilizables.
 
 ---
 
@@ -136,9 +138,11 @@ cp .env.example .env.local
 
 ---
 
-## Skills (8)
+## Skills (11)
 
 Comandos que se invocan directamente en Claude Code con `/nombre`. Cada uno lanza su propio sub-swarm si `.ghl/` existe.
+
+### API Skills (v3)
 
 | Skill | Qué hace | Sub-swarm |
 |---|---|---|
@@ -151,17 +155,27 @@ Comandos que se invocan directamente en Claude Code con `/nombre`. Cada uno lanz
 | `/ghl-capi` | Configurar Meta CAPI con eventos server-side enriquecidos. | capi-strategist + capi-implementer |
 | `/ghl-audit` | Auditoría completa de una location GHL: gaps, problemas, oportunidades. | project-auditor |
 
+### Browser Skills (v4)
+
+| Skill | Qué hace | Sub-swarm |
+|---|---|---|
+| `/ghl-browser-setup` | Crear y configurar UNA sub-cuenta completa via navegador + API híbrido. | browser sub-swarm |
+| `/ghl-batch-create` | Crear MUCHAS sub-cuentas en batch desde un YAML. Resume si se interrumpe. | browser sub-swarm |
+| `/ghl-browser-audit` | Auditar cuentas creadas via browser, verificando que coinciden con el template. | browser sub-swarm |
+
 ---
 
-## Agents (16)
+## Agents (23)
 
-### Nivel 1: Super-Orquestador
+### API Agents (16 — v3)
+
+#### Nivel 1: Super-Orquestador
 
 | Agent | Modelo | Rol |
 |---|---|---|
 | `ghl-deploy-director` | Opus | Super-orquestador. State machine, validaciones cruzadas entre fases, reporte final. Resume de interrupciones. |
 
-### Nivel 2: Mini-Directors + Agentes Solo
+#### Nivel 2: Mini-Directors + Agentes Solo
 
 | Agent | Modelo | Rol |
 |---|---|---|
@@ -173,7 +187,7 @@ Comandos que se invocan directamente en Claude Code con `/nombre`. Cada uno lanz
 | `ghl-integration-engineer` | Sonnet | Lee IDs reales de .ghl/infrastructure.md. Field mapping exacto. |
 | `ghl-project-auditor` | Sonnet | Análisis de landing + auditoría GHL. Solo recolección de datos en Phase 1. |
 
-### Nivel 3: Sub-Agentes Especializados
+#### Nivel 3: Sub-Agentes Especializados
 
 | Agent | Modelo | Sub-swarm | Rol |
 |---|---|---|---|
@@ -185,6 +199,18 @@ Comandos que se invocan directamente en Claude Code con `/nombre`. Cada uno lanz
 | `ghl-nurture-copywriter` | Opus | Nurture | Copy REAL de todos los mensajes SMS+Email. Personalizado al avatar. |
 | `ghl-capi-strategist` | Sonnet | CAPI | Estrategia de attribution: eventos, EMQ, deduplicación, optimization event. |
 | `ghl-capi-implementer` | Sonnet | CAPI | Código CAPI: endpoints, SHA-256 hashing, workflows, testing. |
+
+### Browser Agents (7 — v4)
+
+| Agent | Modelo | Rol |
+|---|---|---|
+| `ghl-browser-director` | Opus | Mini-director del browser sub-swarm. Orquesta auth → account creation → setup. Gestiona batch. |
+| `ghl-browser-auth` | Sonnet | Login en GHL agency dashboard. Maneja 2FA. Detecta sesiones existentes. |
+| `ghl-account-creator` | Opus | Crea sub-cuentas desde el wizard de agencia. Captura Location ID + API Key. |
+| `ghl-pipeline-builder` | Sonnet | Crea pipelines + stages via browser (API no puede). |
+| `ghl-workflow-builder` | Sonnet | Crea workflows con triggers y acciones via browser (API no puede). |
+| `ghl-calendar-builder` | Sonnet | Crea calendarios con disponibilidad via browser (API no puede). |
+| `ghl-integration-configurator` | Sonnet | Configura integraciones (Meta, Stripe) via browser UI. |
 
 ---
 
@@ -280,9 +306,9 @@ GHL-TOOLKIT/
 ├── README.md
 ├── .env.example              # Template de variables de entorno
 ├── .gitignore
-├── sync.sh                   # Sincroniza skills/agents a ~/.claude/
+├── sync.sh                   # Sincroniza skills/agents/templates a ~/.claude/
 │
-├── agents/                   # 16 agentes del swarm v3
+├── agents/                   # 23 agentes (16 API + 7 browser)
 │   ├── ghl-deploy-director.md         # Super-orquestador
 │   ├── ghl-project-auditor.md         # Análisis + auditoría
 │   ├── ghl-scoring-engineer.md        # Mini-director scoring
@@ -298,9 +324,16 @@ GHL-TOOLKIT/
 │   ├── ghl-integration-engineer.md    # Integración landing↔GHL
 │   ├── ghl-capi-engineer.md           # Mini-director CAPI
 │   ├── ghl-capi-strategist.md         # Sub-agente: estrategia
-│   └── ghl-capi-implementer.md        # Sub-agente: implementación
+│   ├── ghl-capi-implementer.md        # Sub-agente: implementación
+│   ├── ghl-browser-director.md        # [v4] Director browser sub-swarm
+│   ├── ghl-browser-auth.md            # [v4] Login via navegador
+│   ├── ghl-account-creator.md         # [v4] Crear sub-cuentas
+│   ├── ghl-pipeline-builder.md        # [v4] Crear pipelines via browser
+│   ├── ghl-workflow-builder.md        # [v4] Crear workflows via browser
+│   ├── ghl-calendar-builder.md        # [v4] Crear calendarios via browser
+│   └── ghl-integration-configurator.md # [v4] Configurar Meta/Stripe via browser
 │
-├── skills/                   # 8 skills invocables
+├── skills/                   # 11 skills invocables (8 API + 3 browser)
 │   ├── ghl-deploy/
 │   │   ├── SKILL.md
 │   │   └── MEMORY-PROTOCOL.md       # Protocolo de memoria compartida
@@ -325,11 +358,28 @@ GHL-TOOLKIT/
 │   ├── ghl-capi/
 │   │   ├── SKILL.md
 │   │   └── EVENT-MAPPING.md
-│   └── ghl-audit/
-│       ├── SKILL.md
-│       └── CHECKLIST.md
+│   ├── ghl-audit/
+│   │   ├── SKILL.md
+│   │   └── CHECKLIST.md
+│   ├── ghl-browser-setup/            # [v4] Setup individual via browser
+│   │   ├── SKILL.md
+│   │   └── UI-SELECTORS.md
+│   ├── ghl-batch-create/             # [v4] Creación masiva
+│   │   ├── SKILL.md
+│   │   ├── BATCH-PROTOCOL.md
+│   │   └── TEMPLATES.md
+│   └── ghl-browser-audit/            # [v4] Auditoría via browser
+│       └── SKILL.md
 │
-├── mcp-server/               # MCP Server (34 tools)
+├── templates/                # [v4] Templates de configuración
+│   ├── _base.yaml                    # Defaults compartidos
+│   └── dental-clinic.yaml            # Ejemplo: clínica dental
+│
+├── .ghl-browser/             # [v4] Browser automation (gitignored)
+│   ├── secrets.env                   # Credenciales de agencia
+│   └── traces/                       # Screenshots, videos, traces
+│
+├── mcp-server/               # MCP Server (34 API tools)
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── src/
@@ -365,6 +415,8 @@ Copiar `.env.example` a `.env.local` y rellenar:
 | `META_ACCESS_TOKEN` | No | Token de acceso de Meta Conversions API (solo para `/ghl-capi`) |
 | `SUPABASE_URL` | No | URL del proyecto Supabase (solo para edge functions) |
 | `SUPABASE_ANON_KEY` | No | Anon key de Supabase (solo para edge functions) |
+| `GHL_AGENCY_EMAIL` | No* | Email de la agencia GHL (*requerido para browser skills) |
+| `GHL_AGENCY_PASSWORD` | No* | Password de la agencia GHL (*requerido para browser skills) |
 
 ---
 
@@ -392,6 +444,65 @@ El `deploy-director` cruza TODOS los outputs y verifica coherencia total: umbral
 
 ### Resume
 Si un deploy se interrumpe, al relanzar detecta `.ghl/state.json` y resume desde el punto exacto sin re-ejecutar agentes completados.
+
+---
+
+## Browser Automation (v4)
+
+### Por qué browser
+
+La API de GHL v2 no puede crear pipelines, workflows, calendarios, sub-cuentas, ni configurar integraciones. El browser sub-swarm usa Playwright MCP para automatizar estas operaciones directamente en la UI de GHL.
+
+### Approach híbrido
+
+| Operación | Método | Razón |
+|---|---|---|
+| Crear sub-cuenta | BROWSER | No hay API |
+| Custom fields | API | Más rápido y fiable |
+| Pipeline + stages | BROWSER | No hay API |
+| Calendario | BROWSER | No hay API |
+| Workflows | BROWSER | No hay API |
+| Webhooks | API | Más rápido |
+| Integraciones (Meta, Stripe) | BROWSER | Requiere UI |
+
+### Crear una cuenta
+
+```
+/ghl-browser-setup --template dental-clinic
+```
+
+### Crear muchas cuentas
+
+```
+/ghl-batch-create ./accounts.yaml --template dental-clinic
+```
+
+Formato del YAML:
+```yaml
+template: dental-clinic
+accounts:
+  - name: "Clínica Madrid Centro"
+    email: "madrid@clinica.es"
+    phone: "+34911234567"
+    address: {street: "Gran Vía 42", city: "Madrid", zip: "28013"}
+  - name: "Clínica Barcelona"
+    email: "bcn@clinica.es"
+```
+
+### Templates
+
+Los templates definen la configuración completa de una sub-cuenta: pipeline, custom fields, calendario, workflows, integraciones, y tags. Se guardan en `templates/` y se reutilizan para crear cuentas idénticas.
+
+Templates incluidos:
+- `_base.yaml` — Defaults compartidos
+- `dental-clinic.yaml` — Clínica dental completa
+
+### Resiliencia
+
+- Usa **accessibility tree** en vez de CSS selectors (resistente a cambios de UI)
+- **Resume automático** si se interrumpe (via `batch-queue.json`)
+- **Error aislado**: si una cuenta falla, las demás continúan
+- **Re-autenticación** automática si la sesión expira
 
 ---
 

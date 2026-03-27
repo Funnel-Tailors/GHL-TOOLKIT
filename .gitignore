@@ -4,3 +4,9 @@ dist/
 .env
 *.log
 .DS_Store
+
+# Browser automation
+.ghl-browser/
+secrets.env
+*.trace
+*.webm

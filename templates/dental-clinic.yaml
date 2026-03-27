@@ -1,0 +1,203 @@
+# GHL-TOOLKIT Template: Clínica Dental
+# Extiende _base.yaml con configuración específica para clínicas dentales
+
+name: dental-clinic
+description: "Template para clínicas dentales: pipeline de pacientes, calendario de primera visita, workflows de seguimiento dental"
+version: "1.0"
+
+# Configuración de cuenta
+account:
+  business_type: "Health & Wellness"
+  timezone: "Europe/Madrid"
+  country: "ES"
+  snapshot_id: null
+
+# Pipeline específico dental
+pipeline:
+  name: "Pacientes Dental"
+  stages:
+    - name: "Lead Entrante"
+      order: 1
+    - name: "Contactado"
+      order: 2
+    - name: "Primera Visita Agendada"
+      order: 3
+    - name: "Primera Visita Completada"
+      order: 4
+    - name: "Presupuesto Enviado"
+      order: 5
+    - name: "Presupuesto Aceptado"
+      order: 6
+    - name: "En Tratamiento"
+      order: 7
+    - name: "Tratamiento Completado"
+      order: 8
+    - name: "Paciente Recurrente"
+      order: 9
+    - name: "Perdido"
+      order: 10
+
+# Custom Fields adicionales (se suman a los de _base.yaml)
+custom_fields:
+  - name: treatment_interest
+    type: SINGLE_OPTIONS
+    purpose: "Tratamiento de interés principal"
+    options:
+      - "Implantes"
+      - "Ortodoncia"
+      - "Blanqueamiento"
+      - "Limpieza"
+      - "Endodoncia"
+      - "Prótesis"
+      - "Estética dental"
+      - "Revisión general"
+      - "Urgencia"
+      - "Otro"
+  - name: insurance_type
+    type: SINGLE_OPTIONS
+    purpose: "Tipo de seguro/cobertura"
+    options:
+      - "Seguro privado"
+      - "Aseguradora"
+      - "Sin seguro"
+      - "Otro"
+  - name: pain_level
+    type: SINGLE_OPTIONS
+    purpose: "Nivel de urgencia/dolor"
+    options:
+      - "Sin dolor - revisión preventiva"
+      - "Molestia leve"
+      - "Dolor moderado"
+      - "Dolor fuerte - urgente"
+  - name: previous_dentist
+    type: SINGLE_OPTIONS
+    purpose: "Historial con dentista"
+    options:
+      - "Sí, tengo dentista habitual"
+      - "Hace más de 1 año que no voy"
+      - "Hace más de 3 años"
+      - "Nunca he ido / primera vez"
+  - name: budget_range
+    type: SINGLE_OPTIONS
+    purpose: "Rango de presupuesto aproximado"
+    options:
+      - "Menos de 500€"
+      - "500€ - 1.500€"
+      - "1.500€ - 3.000€"
+      - "3.000€ - 5.000€"
+      - "Más de 5.000€"
+      - "No tengo presupuesto definido"
+
+# Calendario de primera visita
+calendar:
+  name: "Primera Visita Dental"
+  type: round_robin
+  duration: 45
+  buffer: 15
+  availability:
+    monday: "09:00-14:00,16:00-20:00"
+    tuesday: "09:00-14:00,16:00-20:00"
+    wednesday: "09:00-14:00,16:00-20:00"
+    thursday: "09:00-14:00,16:00-20:00"
+    friday: "09:00-14:00"
+    saturday: null
+    sunday: null
+
+# Workflows específicos dental
+workflows:
+  - name: "Nuevo Lead Dental - Bienvenida"
+    trigger: contact_created
+    actions:
+      - type: send_sms
+        delay: 0
+        content: "¡Hola {{contact.first_name}}! Gracias por contactar con nuestra clínica dental. ¿Te gustaría agendar una primera visita gratuita? Responde SÍ y te llamamos."
+      - type: send_email
+        delay: 0
+        content: "Email de bienvenida con info de la clínica, servicios, y link de booking"
+      - type: add_tag
+        delay: 0
+        config:
+          tag: "lead-dental-nuevo"
+      - type: wait
+        delay: "24h"
+      - type: send_sms
+        content: "{{contact.first_name}}, vi que aún no has agendado tu primera visita. Es gratuita y sin compromiso. ¿Te viene bien esta semana? Aquí puedes elegir horario: {{calendar.link}}"
+
+  - name: "Seguimiento Sin Respuesta"
+    trigger: tag_added
+    trigger_config:
+      tag: "lead-dental-nuevo"
+    actions:
+      - type: wait
+        delay: "72h"
+      - type: send_sms
+        content: "{{contact.first_name}}, solo quería recordarte que tu primera revisión dental es completamente gratuita. Muchos pacientes nos dicen que desearían haber venido antes. ¿Agendamos?"
+      - type: wait
+        delay: "7d"
+      - type: send_email
+        content: "Último recordatorio + testimonios de pacientes + oferta especial primera visita"
+
+  - name: "Recordatorio Primera Visita -24h"
+    trigger: appointment_booked
+    actions:
+      - type: wait
+        delay: "-24h"
+      - type: send_sms
+        content: "¡Hola {{contact.first_name}}! Te recordamos tu cita dental mañana. Trae tu tarjeta de seguro si tienes. ¿Confirmas asistencia? Responde SÍ."
+      - type: add_tag
+        delay: 0
+        config:
+          tag: "recordatorio-24h-enviado"
+
+  - name: "Recordatorio Primera Visita -2h"
+    trigger: appointment_booked
+    actions:
+      - type: wait
+        delay: "-2h"
+      - type: send_sms
+        content: "{{contact.first_name}}, tu cita dental es en 2 horas. Te esperamos en {{location.address}}. Si necesitas cambiarla, llámanos al {{location.phone}}."
+
+  - name: "Post-Visita Seguimiento"
+    trigger: tag_added
+    trigger_config:
+      tag: "primera-visita-completada"
+    actions:
+      - type: wait
+        delay: "2h"
+      - type: send_sms
+        content: "{{contact.first_name}}, gracias por visitarnos hoy. ¿Qué te ha parecido? Si tienes alguna duda sobre el presupuesto, estamos aquí para ayudarte."
+      - type: wait
+        delay: "3d"
+      - type: send_email
+        content: "Resumen de la visita + presupuesto detallado + opciones de financiación"
+      - type: wait
+        delay: "7d"
+      - type: send_sms
+        content: "{{contact.first_name}}, ¿has tenido tiempo de revisar el presupuesto? Recuerda que ofrecemos financiación sin intereses. ¿Hablamos?"
+
+# Integraciones
+integrations:
+  meta_pixel: true
+  stripe: false
+  google_calendar: false
+
+# Tags específicos dental
+tags:
+  - "lead-dental-nuevo"
+  - "primera-visita-agendada"
+  - "primera-visita-completada"
+  - "primera-visita-no-show"
+  - "presupuesto-enviado"
+  - "presupuesto-aceptado"
+  - "presupuesto-rechazado"
+  - "en-tratamiento"
+  - "tratamiento-completado"
+  - "paciente-recurrente"
+  - "recordatorio-24h-enviado"
+  - "recordatorio-2h-enviado"
+  - "urgencia-dental"
+  - "interesado-implantes"
+  - "interesado-ortodoncia"
+  - "interesado-blanqueamiento"
+  - "tiene-seguro"
+  - "sin-seguro"
